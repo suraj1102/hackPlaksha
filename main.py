@@ -1,34 +1,22 @@
 import face_recognition
 import cv2
-import numpy as np 
+import numpy as np
+import os 
+
+IMAGES_PATH = "/Users/suraj/Documents/Coding/forUni/hackPlaksha/images/"
+images_list = os.listdir(IMAGES_PATH)
 
 video_capture = cv2.VideoCapture(0)
 
-suraj_image = face_recognition.load_image_file("images/suraj.jpg")
-suraj_face_encoding = face_recognition.face_encodings(suraj_image)[0]
+known_face_encodings = []
+known_face_names = []
 
-vaisakh_image = face_recognition.load_image_file("images/vaisakh.png")
-vaisakh_face_encoding = face_recognition.face_encodings(vaisakh_image)[0]
+for image_name in images_list:
+    image = face_recognition.load_image_file(IMAGES_PATH + image_name)
+    face_encoding = face_recognition.face_encodings(image)[0]
 
-manan_image = face_recognition.load_image_file("images/manan.png")
-manan_face_encoding = face_recognition.face_encodings(manan_image)[0]
-
-gaurav_image = face_recognition.load_image_file("images/gaurav.png")
-gaurav_face_encoding = face_recognition.face_encodings(gaurav_image)[0]
-
-
-known_face_encodings = [
-    suraj_face_encoding,
-    vaisakh_face_encoding,
-    manan_face_encoding,
-    gaurav_face_encoding
-]
-known_face_names = [
-    "Suraj",
-    "Vaisakh",
-    "Manan",
-    "Gaurav"
-]
+    known_face_encodings.append(face_encoding)
+    known_face_names.append(image_name.split('.')[0])
 
 # Initialize some variables
 face_locations = []
