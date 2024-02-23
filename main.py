@@ -4,16 +4,16 @@ import numpy as np
 
 video_capture = cv2.VideoCapture(0)
 
-suraj_image = face_recognition.load_image_file("suraj.jpg")
+suraj_image = face_recognition.load_image_file("images/suraj.jpg")
 suraj_face_encoding = face_recognition.face_encodings(suraj_image)[0]
 
-vaisakh_image = face_recognition.load_image_file("vaisakh.png")
+vaisakh_image = face_recognition.load_image_file("images/vaisakh.png")
 vaisakh_face_encoding = face_recognition.face_encodings(vaisakh_image)[0]
 
-manan_image = face_recognition.load_image_file("manan.png")
+manan_image = face_recognition.load_image_file("images/manan.png")
 manan_face_encoding = face_recognition.face_encodings(manan_image)[0]
 
-gaurav_image = face_recognition.load_image_file("gaurav.png")
+gaurav_image = face_recognition.load_image_file("images/gaurav.png")
 gaurav_face_encoding = face_recognition.face_encodings(gaurav_image)[0]
 
 
