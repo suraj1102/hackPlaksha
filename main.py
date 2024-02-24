@@ -1,18 +1,20 @@
 import face_recognition
 import cv2
 import numpy as np
-import os 
+import os
+import threading
 
-IMAGES_PATH = "/Users/suraj/Documents/Coding/forUni/hackPlaksha/images/"
-images_list = os.listdir(IMAGES_PATH)
+from utils import *
+
+reference_images = os.listdir(IMAGE_DB_PATH)
 
 video_capture = cv2.VideoCapture(0)
 
 known_face_encodings = []
 known_face_names = []
 
-for image_name in images_list:
-    image = face_recognition.load_image_file(IMAGES_PATH + image_name)
+for image_name in reference_images:
+    image = face_recognition.load_image_file(IMAGE_DB_PATH + image_name)
     face_encoding = face_recognition.face_encodings(image)[0]
 
     known_face_encodings.append(face_encoding)
