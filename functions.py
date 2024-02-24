@@ -1,4 +1,5 @@
 from utils import *
+import face_recognition
 import time
 
 def class_exists (class_id : str = "") -> tuple :
@@ -61,7 +62,7 @@ def get_video_frame (video_capture : cv2.VideoCapture, encoded_details : np.ndar
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
     rgb_small_frame = np.ascontiguousarray(small_frame[:, :, ::-1])
 
-    face_locations = face_recognition.face_locations(rgb_small_frame)
+    face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
     attendee_names = []
@@ -71,7 +72,7 @@ def get_video_frame (video_capture : cv2.VideoCapture, encoded_details : np.ndar
 
         if True in matches:
             first_match_index = matches.index(True)
-            name = encoded_details[:,first_matchindex]
+            name = encoded_details[:,first_match_index]
 
         attendee_names.append(name)
     
@@ -85,15 +86,19 @@ def update_class_log (timestamp : datetime.datetime, mode : str = "entry", atten
 
     return 0
 
-def start_capture (cam_idx : int = 0, lecture_details : tuple, encoded_details : np.ndarray = np.array([])) :
-    video_capture = get_video_stream(cam_idx)
+def start_capture (cam_details : tuple = (), lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])) :
+    video_capture = get_video_stream(cam_details[0])
 
     while time.now() <= lecture_details[4]:
 
         timestamp, attendee_names = get_video_frame(video_capture, encoded_details)
-        update_class_log(timestamp, mode, attendee_names)
+        update_class_log(timestamp, cam_details[1], attendee_names)
         time.sleep(5)
     
+def start_lecture (class_id : str = "") :
+    pass
 
-def main () :
+if __name__ == "__main__":
+    camera_details = tuple(get_camera_details())
+    print(camera_details)
     pass
