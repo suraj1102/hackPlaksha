@@ -1,0 +1,31 @@
+CREATE TABLE Students (
+    UID TEXT PRIMARY KEY,
+    name TEXT
+);
+CREATE TABLE Enrollment (
+    student_UID TEXT,
+    course_ID INTEGER,
+    FOREIGN KEY (student_UID) REFERENCES Students(UID),
+    FOREIGN KEY (course_ID) REFERENCES "Courses_temp"(ID),
+    PRIMARY KEY (student_UID, course_ID)
+);
+CREATE TABLE Lecture (
+    ID INTEGER PRIMARY KEY,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP
+);
+CREATE TABLE Logging (
+    student_ID TEXT,
+    lecture_ID INTEGER,
+    last_entry TIMESTAMP,
+    time_spent INTERVAL,
+    FOREIGN KEY (student_ID) REFERENCES Students(UID),
+    FOREIGN KEY (lecture_ID) REFERENCES Lecture(ID),
+    PRIMARY KEY (student_ID, lecture_ID)
+);
+CREATE TABLE Courses (
+    ID TEXT,
+    lecture_id INTEGER,
+    PRIMARY KEY (ID, lecture_id),
+    FOREIGN KEY (lecture_id) REFERENCES Lecture(ID)
+);
