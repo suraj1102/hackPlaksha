@@ -43,14 +43,13 @@ def encode_attendees (attendees : list = []) -> tuple :
 
     for attendee in attendees:
         attendee_image = 'Attendee Image from DB' # Run SQL Query to get the image of the attendee
-        image = face_recognition.load_image_file(IMAGE_DB_PATH + attendee)
+        image = face_recognition.load_image_file(attendee_image)
         face_encoding = face_recognition.face_encodings(image)[0]
 
         attendee_face_encodings.append(face_encoding)
         attendee_face_names.append(attendee.split('.')[:-1])
 
     return np.array([(attendee_face_encodings[idx], attendee_face_names[idx]) for idx in range(len(attendees))])
-
 
 def get_video_stream (idx : int = 0) -> cv2.VideoCapture:
     return cv2.VideoCapture(idx)
@@ -65,7 +64,7 @@ def get_video_frame (video_capture : cv2.VideoCapture, encoded_details : np.ndar
     face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
-    attendee_names = []
+    attendee_ids = []
     for face_encoding in face_encodings:
         matches = face_recognition.compare_faces(encoded_details[:,0], face_encoding)
         name = "Unknown"
@@ -74,9 +73,9 @@ def get_video_frame (video_capture : cv2.VideoCapture, encoded_details : np.ndar
             first_match_index = matches.index(True)
             name = encoded_details[:,first_match_index]
 
-        attendee_names.append(name)
+        attendee_ids.append(name)
     
-    return (timestamp, attendee_names)
+    return (timestamp, attendee_ids)
 
 def update_class_log (timestamp : datetime.datetime, mode : str = "entry", attendee_names : list = []) -> int :
     # Insert SQL Query here!
@@ -84,16 +83,16 @@ def update_class_log (timestamp : datetime.datetime, mode : str = "entry", atten
         Query to update the class log with the attendance data.
     '''
 
-    return 0
+    return 404
 
 def start_capture (cam_details : tuple = (), lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])) :
     video_capture = get_video_stream(cam_details[0])
 
-    while time.now() <= lecture_details[4]:
+    while datetime.datetime.now() <= lecture_details[4]:
 
         timestamp, attendee_names = get_video_frame(video_capture, encoded_details)
         update_class_log(timestamp, cam_details[1], attendee_names)
-        time.sleep(5)
+        time.sleep(1)
     
 def start_lecture (class_id : str = "") :
     pass
