@@ -1,12 +1,13 @@
 {
-    "1" : {
-        "camera_id" : "A1-201-1",
-        "class_id" : "A1-201",
-        "mode_of_operation" : "entry"
-    },
-    "2" : {
-        "camera_id" : "A1-201-2",
-        "class_id" : "A1-201",
-        "mode_of_operation" : "exit"
+    "class_id" : "A1-101",
+    "cameras" : {
+        "0" : {
+            "camera_id" : "A1-201-1",
+            "mode_of_operation" : "entry"
+        },
+        "1" : {
+            "camera_id" : "A1-201-2",
+            "mode_of_operation" : "exit"
+        }
     }
 }
