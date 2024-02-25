@@ -15,7 +15,7 @@ CREATE TABLE teaching_assistants (
 CREATE TABLE courses (
     id INTEGER PRIMARY KEY,
     course_code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL
 );
 
 CREATE TABLE lectures (
@@ -31,7 +31,7 @@ CREATE TABLE student_enrollment (
     student_id INTEGER NOT NULL,
     course_id INTEGER NOT NULL,
     FOREIGN KEY (student_id) REFERENCES students(id),
-    FOREIGN KEY (course_id) REFERENCES courses(id),
+    FOREIGN KEY (course_id) REFERENCES courses(id)
     -- PRIMARY KEY (student_id, course_id)
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE ta_enrollment (
     ta_id INTEGER NOT NULL,
     course_id INTEGER NOT NULL,
     FOREIGN KEY (ta_id) REFERENCES teaching_assistants(id),
-    FOREIGN KEY (course_id) REFERENCES courses(id),
+    FOREIGN KEY (course_id) REFERENCES courses(id)
     -- PRIMARY KEY (ta_id, course_id)
 );
 
@@ -51,5 +51,5 @@ CREATE TABLE logging (
     time_spent FLOAT NOT NULL,
     recognition_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
-    FOREIGN KEY (lecture_id) REFERENCES lectures(id),
+    FOREIGN KEY (lecture_id) REFERENCES lectures(id)
 );
