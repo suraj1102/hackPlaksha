@@ -1,5 +1,4 @@
 from utils import *
-import face_recognition
 import time
 
 db = sqlite3.connect("./data.db")
@@ -7,7 +6,7 @@ db = sqlite3.connect("./data.db")
 def class_exists (class_id : str = "") -> tuple :
     if class_id == "" : 
         print(f"Cannot create log for undefined class.")
-        return class_id, False
+        return -1
     
     cursor = db.cursor()
     cursor.execute("SELECT * FROM Lecture WHERE ID = ?", (class_id,))
@@ -21,34 +20,39 @@ def class_exists (class_id : str = "") -> tuple :
 def get_attendee_details (lec_id : str = "") -> list :
     if lec_id == "" : 
         print(f"Cannot create log for undefined class.")
-        return []
-
-    attendees = []
+        return -1
+        
+    attendees_details = []
+    
     cursor = db.cursor()
     cursor.execute("SELECT student_UID FROM Enrollment WHERE course_ID = ?", (lec_id,))
-    attendees = [row[0] for row in cursor.fetchall()]
+    attendees_details = [row[0] for row in cursor.fetchall()]
 
-    if attendees == [] :
+    if attendees_details == [] :
         print(f"No attendees found for lecture {lec_id}")
 
-    return attendees
+    attendees = []
+    attendees_encodings = []
 
-def encode_attendees (attendees : list = []) -> tuple :
-    if attendees == [] : 
-        print("Empty Session: Session cannot be empty!")
+    return (attendees_encodings, attendees)
 
-    attendee_face_encodings = []
-    attendee_face_names = []
+# def encode_attendees (attendees : list = []) -> tuple :
+#     if attendees == [] : 
+#         print("Empty Session: Session cannot be empty!")
+#         return -1
 
-    for attendee in attendees:
-        attendee_image = 'Attendee Image from DB' # Run SQL Query to get the image of the attendee
-        image = face_recognition.load_image_file(attendee_image)
-        face_encoding = face_recognition.face_encodings(image)[0]
+#     attendee_face_encodings = []
+#     attendee_face_names = []
 
-        attendee_face_encodings.append(face_encoding)
-        attendee_face_names.append(attendee.split('.')[:-1])
+#     for attendee in attendees:
+#         attendee_image = 'Attendee Image from DB' # Run SQL Query to get the image of the attendee
+#         image = face_recognition.load_image_file(attendee_image)
+#         face_encoding = face_recognition.face_encodings(image)[0]
 
-    return np.array([(attendee_face_encodings[idx], attendee_face_names[idx]) for idx in range(len(attendees))])
+#         attendee_face_encodings.append(face_encoding)
+#         attendee_face_names.append(attendee.split('.')[:-1])
+
+#     return np.array([(attendee_face_encodings[idx], attendee_face_names[idx]) for idx in range(len(attendees))])
 
 def get_video_stream (idx : int = 0) -> cv2.VideoCapture:
     return cv2.VideoCapture(idx)
@@ -85,44 +89,47 @@ def update_class_log (timestamp : datetime.datetime, lecture_ID : str, mode : st
 
     return 200
 
-def start_capture (cam_details : tuple = (), lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])) :
-    video_capture = get_video_stream(cam_details[0])
+def start_capture (cam_id : int = 0, lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])) :
+    video_capture = get_video_stream(cam_id)
 
     while datetime.datetime.now() <= lecture_details[4]:
 
         timestamp, attendee_names = get_video_frame(video_capture, encoded_details)
-        update_class_log(timestamp, cam_details[1], attendee_names)
+        update_class_log(timestamp, lecture_details[0], attendee_names)
         time.sleep(1)
     
-def start_lecture (class_id : str = ""):
-    class_info = class_exists(class_id)
-    if not class_info[1]:
-        print("Lecture does not exist.")
-        return
+def end_lecture (lecture_details : tuple = ()) :
+    
+    #  fetch log from the DB and create a report in excel. Send to respeqctive faculty
+    
+    print(f"Ending Lecture {lecture_details[0]}")
+    return 200
 
-    # Retrieve lecture details
-    lecture_id = class_info[2]
-    start_time = class_info[3]
-    end_time = class_info[4]
+def start_lecture (class_id : str = "", cam_details : dict = {}, lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])):
+    
+    if class_id == "" or cam_details == {} or lecture_details == () or encoded_details == np.array([]):
+        print("Invalid Arguments: Cannot start lecture.")
+        return 400
 
-    # Get attendee details
-    attendees = get_attendee_details(lecture_id)
+    for camera in cam_details:
+        threading.Thread(target=start_capture, args=((camera, cam_details['camera']), lecture_details, encoded_details)).start()
 
-    # Encode attendee information
-    encoded_details = encode_attendees(attendees)
-
-    # Start capturing video and processing attendance
-    video_capture = get_video_stream()
-    while datetime.datetime.now() <= end_time:
-        timestamp, attendee_names = get_video_frame(video_capture, encoded_details)
-        update_class_log(timestamp, "entry", attendee_names)
-        time.sleep(1)
-
-    print("Lecture ended.")
-
-
+    
 if __name__ == "__main__":
-    # camera_details = tuple(get_camera_details())
-    # print(camera_details)
-    class_id = input("Enter the ID of the lecture to start: ")
-    start_lecture(class_id)
+    camera_details = tuple(get_camera_details())
+    print(camera_details)
+
+    class_id = camera_details[0]
+
+    deployed = False
+
+    while deployed:
+        class_status = class_exists(class_id)
+
+        if class_status[1]:
+            lecture_details = (class_status[2], class_status[3], class_status[4])
+            encoded_details = get_attendee_details(class_status[2])
+
+            start_lecture(class_id, camera_details[1], lecture_details, encoded_details)
+
+        
