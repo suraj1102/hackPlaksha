@@ -36,24 +36,6 @@ def get_attendee_details (lec_id : str = "") -> list :
 
     return (attendees_encodings, attendees)
 
-# def encode_attendees (attendees : list = []) -> tuple :
-#     if attendees == [] : 
-#         print("Empty Session: Session cannot be empty!")
-#         return -1
-
-#     attendee_face_encodings = []
-#     attendee_face_names = []
-
-#     for attendee in attendees:
-#         attendee_image = 'Attendee Image from DB' # Run SQL Query to get the image of the attendee
-#         image = face_recognition.load_image_file(attendee_image)
-#         face_encoding = face_recognition.face_encodings(image)[0]
-
-#         attendee_face_encodings.append(face_encoding)
-#         attendee_face_names.append(attendee.split('.')[:-1])
-
-#     return np.array([(attendee_face_encodings[idx], attendee_face_names[idx]) for idx in range(len(attendees))])
-
 def get_video_stream (idx : int = 0) -> cv2.VideoCapture:
     return cv2.VideoCapture(idx)
 
