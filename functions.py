@@ -2,16 +2,16 @@ from utils import *
 import face_recognition
 import time
 
+db = sqlite3.connect("./data.db")
+
 def class_exists (class_id : str = "") -> tuple :
     if class_id == "" : 
         print(f"Cannot create log for undefined class.")
-
-    # Insert SQL Query here!
-    '''
-        Query to check if the class has a scheduled lecture. 
-    '''
+        return class_id, False
     
-    class_data = None
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Lecture WHERE ID = ?", (class_id,))
+    class_data = cursor.fetchone()
 
     if class_data == None :
         return (class_id, False)
@@ -21,13 +21,12 @@ def class_exists (class_id : str = "") -> tuple :
 def get_attendee_details (lec_id : str = "") -> list :
     if lec_id == "" : 
         print(f"Cannot create log for undefined class.")
+        return []
 
     attendees = []
-
-    # Insert SQL Query here!
-    '''
-        Query to get the attendees UID for a specific lecture (with lec_id).
-    '''
+    cursor = db.cursor()
+    cursor.execute("SELECT student_UID FROM Enrollment WHERE course_ID = ?", (lec_id,))
+    attendees = [row[0] for row in cursor.fetchall()]
 
     if attendees == [] :
         print(f"No attendees found for lecture {lec_id}")
@@ -77,13 +76,14 @@ def get_video_frame (video_capture : cv2.VideoCapture, encoded_details : np.ndar
     
     return (timestamp, attendee_ids)
 
-def update_class_log (timestamp : datetime.datetime, mode : str = "entry", attendee_names : list = []) -> int :
-    # Insert SQL Query here!
-    '''
-        Query to update the class log with the attendance data.
-    '''
+def update_class_log (timestamp : datetime.datetime, lecture_ID : str, mode : str = "entry", attendee_names : list = []) -> int :
+    cursor = db.cursor()
+    for student_ID in attendee_names:
+        cursor.execute("INSERT INTO Logging (student_ID, lecture_ID, last_entry, time_spent) VALUES (?, ?, ?, ?)",
+                       (student_ID, lecture_ID, timestamp, 0))
+    db.commit()
 
-    return 404
+    return 200
 
 def start_capture (cam_details : tuple = (), lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])) :
     video_capture = get_video_stream(cam_details[0])
@@ -94,10 +94,35 @@ def start_capture (cam_details : tuple = (), lecture_details : tuple = (), encod
         update_class_log(timestamp, cam_details[1], attendee_names)
         time.sleep(1)
     
-def start_lecture (class_id : str = "") :
-    pass
+def start_lecture (class_id : str = ""):
+    class_info = class_exists(class_id)
+    if not class_info[1]:
+        print("Lecture does not exist.")
+        return
+
+    # Retrieve lecture details
+    lecture_id = class_info[2]
+    start_time = class_info[3]
+    end_time = class_info[4]
+
+    # Get attendee details
+    attendees = get_attendee_details(lecture_id)
+
+    # Encode attendee information
+    encoded_details = encode_attendees(attendees)
+
+    # Start capturing video and processing attendance
+    video_capture = get_video_stream()
+    while datetime.datetime.now() <= end_time:
+        timestamp, attendee_names = get_video_frame(video_capture, encoded_details)
+        update_class_log(timestamp, "entry", attendee_names)
+        time.sleep(1)
+
+    print("Lecture ended.")
+
 
 if __name__ == "__main__":
-    camera_details = tuple(get_camera_details())
-    print(camera_details)
-    pass
+    # camera_details = tuple(get_camera_details())
+    # print(camera_details)
+    class_id = input("Enter the ID of the lecture to start: ")
+    start_lecture(class_id)
