@@ -7,10 +7,13 @@ def class_exists (class_id : str = "") -> tuple :
     if class_id == "" : 
         print(f"Cannot create log for undefined class.")
         return -1
-    
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM Lecture WHERE ID = ?", (class_id,))
-    class_data = cursor.fetchone()
+
+    '''
+        cursor = db.cursor()
+        cursor.execute("Insert SQL Query Here!")
+        class_data = cursor.fetchone()
+    '''
+    class_data = []
 
     if class_data == None :
         return (class_id, False)
@@ -23,10 +26,13 @@ def get_attendee_details (lec_id : str = "") -> list :
         return -1
         
     attendees_details = []
-    
-    cursor = db.cursor()
-    cursor.execute("SELECT student_UID FROM Enrollment WHERE course_ID = ?", (lec_id,))
-    attendees_details = [row[0] for row in cursor.fetchall()]
+
+    '''
+        cursor = db.cursor()
+        cursor.execute("Insert SQL Query Here!")
+        class_data = cursor.fetchone()
+    '''
+    attendees_details = []
 
     if attendees_details == [] :
         print(f"No attendees found for lecture {lec_id}")
@@ -63,13 +69,12 @@ def get_video_frame (video_capture : cv2.VideoCapture, encoded_details : np.ndar
     return (timestamp, attendee_ids)
 
 def update_class_log (timestamp : datetime.datetime, lecture_ID : str, mode : str = "entry", attendee_names : list = []) -> int :
-    cursor = db.cursor()
-    for student_ID in attendee_names:
-        cursor.execute("INSERT INTO Logging (student_ID, lecture_ID, last_entry, time_spent) VALUES (?, ?, ?, ?)",
-                       (student_ID, lecture_ID, timestamp, 0))
-    db.commit()
-
-    return 200
+    '''
+        cursor = db.cursor()
+        for student_ID in attendee_names:
+            cursor.execute("Insert SQL Query Here!")
+        class_data = cursor.fetchone()
+    '''
 
 def start_capture (cam_id : int = 0, lecture_details : tuple = (), encoded_details : np.ndarray = np.array([])) :
     video_capture = get_video_stream(cam_id)

@@ -14,7 +14,7 @@ CREATE TABLE teaching_assistants (
 
 CREATE TABLE courses (
     id INTEGER PRIMARY KEY,
-    course_code TEXT NOT NULL,
+    course_code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL
 );
 
